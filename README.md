@@ -1,66 +1,106 @@
-# Adds support for namespaces in Volt
+# Volt Namespaces
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/ganyicz/volt-namespace.svg?style=flat-square)](https://packagist.org/packages/ganyicz/volt-namespace)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/ganyicz/volt-namespace/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/ganyicz/volt-namespace/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/ganyicz/volt-namespace/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/ganyicz/volt-namespace/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/ganyicz/volt-namespace.svg?style=flat-square)](https://packagist.org/packages/ganyicz/volt-namespace)
-
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
-
-## Support us
-
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/volt-namespace.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/volt-namespace)
-
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
-
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
-
-## Installation
-
-You can install the package via composer:
-
-```bash
-composer require ganyicz/volt-namespace
-```
-
-You can publish and run the migrations with:
-
-```bash
-php artisan vendor:publish --tag="volt-namespace-migrations"
-php artisan migrate
-```
-
-You can publish the config file with:
-
-```bash
-php artisan vendor:publish --tag="volt-namespace-config"
-```
-
-This is the contents of the published config file:
-
-```php
-return [
-];
-```
-
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag="volt-namespace-views"
-```
+This is a (working) proof of concept.
 
 ## Usage
 
-```php
-$voltNamespace = new Ganyicz\VoltNamespace();
-echo $voltNamespace->echoPhrase('Hello, Ganyicz!');
+Install the package via composer:
+
+```
+composer require ganyicz/volt-namespace
 ```
 
-## Testing
+Mount a new namespace in your VoltServiceProvider:
 
-```bash
-composer test
+```diff
+public function boot(): void
+{
+    Volt::mount([
+        config('livewire.view_path', resource_path('views/livewire')),
+        resource_path('views/pages'),
+    ]);
+
++   VoltNamespace::mount('admin', resource_path('views/admin/livewire'));
+}
 ```
+
+Use the namespace when rendering a volt component:
+
+```html
+<livewire:admin:search-users />
+```
+
+The above will load a volt component from the following path:
+
+```
+/resources/views/admin/livewire/search-users.blade.php
+```
+
+## Why
+
+Using namespaces allows for a cleaner directory structure when maintaining multiple frontends in one repo. With Blade, we can already register a namespace for anonymous components like this:
+
+```
+Blade::anonymousComponentPath(resource_path('views/admin/components'), 'admin');
+```
+
+Combined, this allows us to have the following structure that keeps all related views together, including livewire, blade components and regular views:
+
+```
+resources
+└─ views
+  └─ admin
+    └─ auth
+    └─ pages
+    └─ livewire
+    └─ components
+```
+
+Whereas _without_ namespaces, we would have to use subdirectories, which fragments the structure:
+
+```
+resources
+└─ views
+  └─ admin
+    └─ auth
+    └─ pages
+  └─ components
+    └─ admin
+  └─ livewire
+    └─ admin
+```
+
+## Disclaimer
+
+This packge has only been tested in a single project with a specific setup and alters core functionalities of Laravel and Volt. This could have unintended consequences in your app. Use at your own risk.
+
+If this functionality were to be added to the core of Volt, this could be achieved with a lot less hackery.
+
+## How it works
+
+1. It binds a custom view finder that extends the `Illuminate\View\FileViewFinder`. This is required to load the correct view in the namespaced components.
+
+    Volt uses a custom `volt-livewire` view namespace that contains all mounted paths and when a component is rendered it will try to load the following view for `<livewire:search-users />`:
+
+    ```
+    volt-livewire::search-users
+    ```
+
+    The first part is the custom view namespace and the second part is the component name that Volt will look for in all mounted paths. In our case the name of the component would contain the "sub-namespace" like this:
+
+    ```
+    volt-livewire::admin:search-users
+    ```
+
+    The package simply moves the primary namespace separator like this:
+
+    ```
+    volt-livewire:admin::search-users
+    ```
+
+    Where `volt-livewire:admin` is a new view namespace that is registered by the pacakge when a volt namespace is mounted. This namespace contains the paths defined by the user in `VoltNamespace::mount()` method.
+
+2. It replaces the `Livewire\Volt\Precompilers\ExtractTemplate` precompiler to include the registered namespaced directories in the pre-compilation process.
 
 ## Changelog
 
