@@ -2,9 +2,9 @@
 
 namespace Ganyicz\VoltNamespace\Tests;
 
+use Ganyicz\VoltNamespace\VoltNamespaceServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Ganyicz\VoltNamespace\VoltNamespaceServiceProvider;
 
 class TestCase extends Orchestra
 {

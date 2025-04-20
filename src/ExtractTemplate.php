@@ -14,8 +14,7 @@ class ExtractTemplate extends Precompiler
     public function __construct(
         protected MountedDirectories $mountedDirectories,
         protected MountedNamespaceDirectories $mountedNamespaceDirectories,
-    ) {
-    }
+    ) {}
 
     /**
      * Determine if the current view is a Volt component.

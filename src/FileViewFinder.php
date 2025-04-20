@@ -21,7 +21,7 @@ class FileViewFinder extends Finder
         if ($namespace === 'volt-livewire' && Str::contains($view, ':')) {
             $segments = explode(':', $view);
 
-            $namespace = 'volt-livewire:' . $segments[0];
+            $namespace = 'volt-livewire:'.$segments[0];
             $view = $segments[1];
         }
 

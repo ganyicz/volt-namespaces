@@ -30,7 +30,7 @@ class MountedNamespaceDirectories
 
         $this->paths[$namespace] = array_merge($this->paths[$namespace] ?? [], $paths->all());
 
-        View::replaceNamespace('volt-livewire:' . $namespace, collect($this->paths[$namespace])->pluck('path')->all());
+        View::replaceNamespace('volt-livewire:'.$namespace, collect($this->paths[$namespace])->pluck('path')->all());
     }
 
     /**

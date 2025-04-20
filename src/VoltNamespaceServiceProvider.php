@@ -2,10 +2,10 @@
 
 namespace Ganyicz\VoltNamespace;
 
-use Spatie\LaravelPackageTools\Package;
-use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Livewire\Livewire;
 use Livewire\Volt\ComponentResolver;
+use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class VoltNamespaceServiceProvider extends PackageServiceProvider
 {
@@ -22,7 +22,7 @@ class VoltNamespaceServiceProvider extends PackageServiceProvider
 
         $this->app->bind('view.finder', function ($app) {
             return new FileViewFinder($app['files'], $app['config']['view.paths']);
-        });   
+        });
     }
 
     public function packageBooted()
@@ -35,6 +35,6 @@ class VoltNamespaceServiceProvider extends PackageServiceProvider
                     $segments[1], collect(app(MountedNamespaceDirectories::class)->paths($segments[0]))->pluck('path')->all(),
                 );
             }
-        });   
+        });
     }
 }
