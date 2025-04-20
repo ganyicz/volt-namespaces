@@ -48,6 +48,6 @@ class MountedNamespaceDirectories
      */
     public function paths(string $namespace): array
     {
-        return $this->paths[$namespace];
+        return $this->paths[$namespace] ?? [];
     }
 }
